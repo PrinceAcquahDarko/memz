@@ -6,24 +6,28 @@ import { editMediaDto, MediaDto } from './dto';
 export class MediaService {
     constructor(private ps: PrismaService){}
 
-    async uploadMedia(dto:MediaDto, file){
+    async uploadMedia(dto:MediaDto, file, userId:number){
         this.mediaType(dto, file)
 
         this.ImageUrl(dto,file)
         
         //insert into db
         // http://localhost:3000/files\\2022-03-07T17-06-13.326Zavi.jpg
-       return await this.createMedia(dto)
+       return await this.createMedia(dto, userId)
         
 
     }
 
-    async editMedia(dto:editMediaDto, id:number){
+    async editMedia(dto:editMediaDto, id:number, userId:number){
         const media = await this.findMedia(id)
+        console.log(media)
 
         if(!media) throw new ForbiddenException('no such media')
+        if(media.userId !== userId) throw new ForbiddenException("can't perform operation")
 
-        return this.updateMediaLogic(id, dto)
+        console.log('here')
+
+        return  this.updateMediaLogic(id, dto)
     }
 
     getMedia(id:number){
@@ -34,10 +38,11 @@ export class MediaService {
         return this.getAllMediaLogic()
     }
 
-    async deleteMedia(id:number){
+    async deleteMedia(id:number, userId:number){
         const media = await this.findMedia(id)
 
         if(!media) throw new ForbiddenException('no such media')
+        if(media.userId !== userId) throw new ForbiddenException("can't perform operation")
 
         return this.deleteMediaLogic(id)
 
@@ -72,13 +77,16 @@ export class MediaService {
         console.log(dto)
     }
 
-    async createMedia(dto:MediaDto){
+    async createMedia(dto:MediaDto, userId:number){
         try {
             const media = await this.ps.media.create({
                 data:{
+                    userId,
                     ...dto
                 }
             })
+
+            return media
         } catch (error) {
             throw error
         }
@@ -97,18 +105,27 @@ export class MediaService {
     }
 
     async updateMediaLogic(id:number, dto:editMediaDto){
-        return this.ps.media.update({
+        await this.ps.media.update({
             where:{
-                id:
+                id
             },
             data:{
                 ...dto
             }
         })
+     
     }
 
     async getAllMediaLogic(){
-        const media = await this.ps.media.findMany()
+        const media = await this.ps.media.findMany({
+            include:{
+                user:{
+                    select:{
+                        email:true
+                    }
+                }
+            }
+        })
         return media
     }
 

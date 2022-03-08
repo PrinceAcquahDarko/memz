@@ -19,7 +19,7 @@ model User{
     firstName String
     lastName String
 
-    media Media[]?
+    media Media[]
 }
 
 model Media{
@@ -33,9 +33,9 @@ model Media{
 
     link String
 
-    likes Number?
+    likes Int?
 
-    dislikes Number?
+    dislikes Int?
 
     Mediatype String
 

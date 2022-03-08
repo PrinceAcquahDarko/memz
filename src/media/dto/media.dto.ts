@@ -1,4 +1,4 @@
-import {  IsNotEmpty, IsNumber, IsString } from "class-validator";
+import {  IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class MediaDto {
     @IsString()
@@ -14,9 +14,10 @@ export class MediaDto {
     link: string;
 
     @IsNumber()
+    @IsOptional()
     likes: number;
 
-    
+    @IsOptional()
     @IsNumber()
     dislikes: number;
 

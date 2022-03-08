@@ -1,6 +1,9 @@
-import { Body, Controller, Post, Delete, UploadedFile, UseInterceptors, Patch, Param, ParseIntPipe, Get, HttpCode, HttpStatus } from '@nestjs/common';
+import { Body, Controller, Post, Delete, UploadedFile, UseInterceptors, Patch, Param, ParseIntPipe, Get, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
+import { GetUser } from 'src/auth/decorator';
+import { JwtGuard } from 'src/auth/guard';
 import { editMediaDto, MediaDto } from './dto';
 import { MediaService } from './media.service';
 
@@ -17,6 +20,7 @@ const imageFileFilter = (req, file, callback) => {
     callback(null, new Date().toISOString().replace(/:/g, '-') + file.originalname);
   };
 
+@UseGuards(JwtGuard)
 @Controller('media')
 export class MediaController {
     constructor(private ms: MediaService){}
@@ -32,13 +36,13 @@ export class MediaController {
             fileSize: 1024*1024 * 5
           }
     }))
-    uploadMedia(@Body() dto:MediaDto, @UploadedFile() file: Express.Multer.File) {
-        return this.ms.uploadMedia(dto, file)
+    uploadMedia(@GetUser('id') userId: number, @Body() dto:MediaDto, @UploadedFile() file: Express.Multer.File) {
+      return this.ms.uploadMedia(dto, file,userId)
     }
 
     @Patch(':id')
-    editMedia(@Body() dto:editMediaDto, @Param('id', ParseIntPipe) id:number){
-        return this.ms.editMedia(dto,id)
+    editMedia(@GetUser('id') userId: number, @Body() dto:editMediaDto, @Param('id', ParseIntPipe) id:number){
+        return this.ms.editMedia(dto,id, userId)
     }
 
     @Get(':id')
@@ -47,14 +51,16 @@ export class MediaController {
     }
 
     @Get()
-    getAllMedia(){
-        return this.ms.getAllMedia()
+    getAllMedia(@GetUser('id') userId: number,){
+      // console.log(userId, 'from userId')  
+       
+      return this.ms.getAllMedia()
     }
 
     @HttpCode(HttpStatus.NO_CONTENT)
     @Delete(':id')
-    deleteBookmarById(@Param('id', ParseIntPipe) id:number){
-        return this.ms.deleteMedia(id)
+    deleteBookmarById(@GetUser('id') userId: number, @Param('id', ParseIntPipe) id:number){
+        return this.ms.deleteMedia(id, userId)
     }
 
 

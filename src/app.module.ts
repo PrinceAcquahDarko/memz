@@ -10,7 +10,8 @@ import { MediaModule } from './media/media.module';
 @Module({
   imports: [ConfigModule.forRoot({
     isGlobal:true
-  }), AuthModule, PrismaModule, UserModule, MediaModule],
+  }),
+   AuthModule, PrismaModule, UserModule, MediaModule],
   controllers: [AppController],
   providers: [AppService],
 })

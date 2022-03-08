@@ -6,14 +6,18 @@ export class editMediaDto{
     @IsOptional()
     title?:string
     
+    
     @IsString()
     @IsOptional()
     description?:string
 
+
+    @IsOptional()
     @IsNumber()
     likes: number;
 
-    
+
+    @IsOptional()
     @IsNumber()
     dislikes: number;
 
